@@ -248,12 +248,12 @@ The main DAG orchestrates the complete ETL pipeline with 12 tasks:
 
 ```mermaid
 graph LR
-    subGraph "Setup & Ingestion (Bronze)"
+    subgraph "Setup & Ingestion (Bronze)"
         A[wait_for_postgres<br/>DB Health Check] --> B[python_load_flights<br/>Ingest DIM_FLIGHT (6M+)]
         A --> C[python_load_bookings<br/>Ingest FACT_BOOKING (500K+)]
     end
     
-    subGraph "Transformation (Silver & Gold)"
+    subgraph "Transformation (Silver & Gold)"
         B --> D[talend_clean_silver<br/>Cleanse & Stage Data]
         C --> D
         D --> E[talend_dim_build<br/>Build Dimensions]
@@ -261,7 +261,7 @@ graph LR
         F --> G[weather_api_enrich<br/>Enrich DIM_WEATHER]
     end
     
-    subGraph "Validation & Finish"
+    subgraph "Validation & Finish"
         G --> H[validate_gold_schema<br/>Check Star Schema]
         H --> I[pipeline_complete<br/>✅ Done]
     end
