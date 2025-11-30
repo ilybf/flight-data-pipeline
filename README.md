@@ -25,7 +25,7 @@ This project demonstrates an **end-to-end ETL pipeline** processing raw flight a
 ### Data Flow
 
 ```mermaid
-flowchart LR
+graph TB
     subgraph "Source"
         Raw[(Local Files/APIs<br/>Flight/Booking Data)]
         WeatherAPI[(External Weather API<br/>Real-time Data)]
@@ -246,7 +246,7 @@ ETL-FLIGHT/
 The main DAG orchestrates the complete ETL pipeline with 12 tasks:
 
 ```mermaid
-flowchart TB
+graph LR
     subGraph "Setup & Ingestion (Bronze)"
         A[wait_for_postgres<br/>DB Health Check] --> B[python_load_flights<br/>Ingest DIM_FLIGHT (6M+)]
         A --> C[python_load_bookings<br/>Ingest FACT_BOOKING (500K+)]
