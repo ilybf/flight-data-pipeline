@@ -34,6 +34,7 @@ graph TB
     subgraph "ETL/Processing"
         Python[Python ETL Script<br/>Multi-threaded Ingestion]
         Talend[Talend 8.0.1<br/>Data Transformation/Cleansing]
+        Spark[Apache Spark 3.3.0<br/>Batch Processing]
         Airflow[Apache Airflow 2.0+<br/>Workflow Orchestrator]
     end
 
@@ -42,6 +43,7 @@ graph TB
         Bronze[Bronze Layer<br/>Raw Data]
         Silver[Silver Layer<br/>Cleaned/Staging Data]
         Gold[Gold Layer<br/>Star Schema]
+        Hadoop[(HDFS/Hive<br/>Data Lake)]
     end
 
     Raw -->|Extract| Python
@@ -50,15 +52,23 @@ graph TB
     Talend -->|Transform & Load| Silver
     Silver -->|Dimensional Model| Talend
     Talend -->|Enrichment| WeatherAPI
+
+    %% New Flow: Talend feeds Spark
+    Talend -->|Cleaned Data| Spark
+    Spark -->|Load| Hadoop
+
     Talend -->|Load| Gold
 
     Airflow -. orchestrates .-> Python
     Airflow -. orchestrates .-> Talend
+    Airflow -. orchestrates .-> Spark
 
     style DBeaver fill:#4169E1,stroke:#4169E1,color:#fff,stroke-width:2px
     style Python fill:#3776AB,stroke:#3776AB,color:#fff,stroke-width:2px
     style Talend fill:#FF5B00,stroke:#FF5B00,color:#fff,stroke-width:2px
+    style Spark fill:#E25A1C,stroke:#E25A1C,color:#fff,stroke-width:2px
     style Airflow fill:#017CEE,stroke:#017CEE,color:#fff,stroke-width:2px
+    style Hadoop fill:#66CCFF,stroke:#66CCFF,color:#000,stroke-width:2px
 ```
 
 ### Technology Stack
@@ -248,22 +258,22 @@ The main DAG orchestrates the complete ETL pipeline with 12 tasks:
 
 ```mermaid
 flowchart TB
-    subgraph Setup & Ingestion (Bronze)
-        A[wait_for_postgres<br>DB Health Check] --> B[python_load_flights<br>Ingest DIM_FLIGHT (6M+)]
-        A --> C[python_load_bookings<br>Ingest FACT_BOOKING (500K+)]
+    subgraph Setup_Ingestion_Bronze
+        A[wait_for_postgres\nDB Health Check] --> B[python_load_flights\nIngest DIM_FLIGHT (6M+)]
+        A --> C[python_load_bookings\nIngest FACT_BOOKING (500K+)]
     end
 
-    subgraph Transformation (Silver & Gold)
-        B --> D[talend_clean_silver<br>Cleanse & Stage Data]
+    subgraph Transformation_Silver_Gold
+        B --> D[talend_clean_silver\nCleanse & Stage Data]
         C --> D
-        D --> E[talend_dim_build<br>Build Dimensions]
-        E --> F[talend_fact_load<br>Load FACT_BOOKING]
-        F --> G[weather_api_enrich<br>Enrich DIM_WEATHER]
+        D --> E[talend_dim_build\nBuild Dimensions]
+        E --> F[talend_fact_load\nLoad FACT_BOOKING]
+        F --> G[weather_api_enrich\nEnrich DIM_WEATHER]
     end
 
-    subgraph Validation & Finish
-        G --> H[validate_gold_schema<br>Check Star Schema]
-        H --> I[pipeline_complete<br>✅ Done]
+    subgraph Validation_Finish
+        G --> H[validate_gold_schema\nCheck Star Schema]
+        H --> I[pipeline_complete\nDone]
     end
 
     style A fill:#4FC3F7,stroke:#0288D1,color:#000,stroke-width:2px
