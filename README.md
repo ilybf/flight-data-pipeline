@@ -26,38 +26,39 @@ This project demonstrates an **end-to-end ETL pipeline** processing raw flight a
 
 ```mermaid
 graph TB
-    subgraph "Source"
-        Raw[(Local Files/APIs<br/>Flight/Booking Data)]
-        WeatherAPI[(External Weather API<br/>Real-time Data)]
-    end
-    
-    subgraph "ETL/Processing"
-        Python[Python ETL Script<br/>Multi-threaded Ingestion]
-        Talend[Talend 8.0.1<br/>Data Transformation/Cleansing]
-        Airflow[Apache Airflow 2.0+<br/>Workflow Orchestrator]
-    end
-    
-    subgraph "Storage"
-        DBeaver(PostgreSQL DB<br/>Docker Container)
-        Bronze[Bronze Layer<br/>Raw Data]
-        Silver[Silver Layer<br/>Cleaned/Staging Data]
-        Gold[Gold Layer<br/>Star Schema]
-    end
-    
-    Raw -->|Extract| Python
-    Python -->|Load| DBeaver
-    DBeaver -.Bronze-> Talend
-    Talend -->|Transform & Load| Silver
-    Silver -->|Dimensional Model| Talend
-    Talend -->|Enrichment| WeatherAPI
-    Talend -->|Load| Gold
-    Airflow -. orchestrates .-> Python
-    Airflow -. orchestrates .-> Talend
+    subgraph "Source"
+        Raw[(Local Files/APIs<br/>Flight/Booking Data)]
+        WeatherAPI[(External Weather API<br/>Real-time Data)]
+    end
 
-    style DBeaver fill:#4169E1,stroke:#4169E1,color:#fff,stroke-width:2px
-    style Python fill:#3776AB,stroke:#3776AB,color:#fff,stroke-width:2px
-    style Talend fill:#FF5B00,stroke:#FF5B00,color:#fff,stroke-width:2px
-    style Airflow fill:#017CEE,stroke:#017CEE,color:#fff,stroke-width:2px
+    subgraph "ETL/Processing"
+        Python[Python ETL Script<br/>Multi-threaded Ingestion]
+        Talend[Talend 8.0.1<br/>Data Transformation/Cleansing]
+        Airflow[Apache Airflow 2.0+<br/>Workflow Orchestrator]
+    end
+
+    subgraph "Storage"
+        DBeaver(PostgreSQL DB<br/>Docker Container)
+        Bronze[Bronze Layer<br/>Raw Data]
+        Silver[Silver Layer<br/>Cleaned/Staging Data]
+        Gold[Gold Layer<br/>Star Schema]
+    end
+
+    Raw -->|Extract| Python
+    Python -->|Load| DBeaver
+    DBeaver -. Bronze .-> Talend
+    Talend -->|Transform & Load| Silver
+    Silver -->|Dimensional Model| Talend
+    Talend -->|Enrichment| WeatherAPI
+    Talend -->|Load| Gold
+
+    Airflow -. orchestrates .-> Python
+    Airflow -. orchestrates .-> Talend
+
+    style DBeaver fill:#4169E1,stroke:#4169E1,color:#fff,stroke-width:2px
+    style Python fill:#3776AB,stroke:#3776AB,color:#fff,stroke-width:2px
+    style Talend fill:#FF5B00,stroke:#FF5B00,color:#fff,stroke-width:2px
+    style Airflow fill:#017CEE,stroke:#017CEE,color:#fff,stroke-width:2px
 ```
 
 ### Technology Stack
