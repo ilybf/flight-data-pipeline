@@ -26,49 +26,93 @@ This project demonstrates an **end-to-end ETL pipeline** processing raw flight a
 
 ```mermaid
 graph TB
-    subgraph "Source"
-        Raw[(Local Files/APIs<br/>Flight/Booking Data)]
-        WeatherAPI[(External Weather API<br/>Real-time Data)]
-    end
 
-    subgraph "ETL/Processing"
-        Python[Python ETL Script<br/>Multi-threaded Ingestion]
-        Talend[Talend 8.0.1<br/>Data Transformation/Cleansing]
-        Spark[Apache Spark 3.3.0<br/>Batch Processing]
-        Airflow[Apache Airflow 2.0+<br/>Workflow Orchestrator]
-    end
+%% ============================
+%%         SOURCE LAYER
+%% ============================
+subgraph Source["Source"]
+    Raw[(Local Files/APIs<br/>Flight/Booking Data)]
+    WeatherAPI[(External Weather API<br/>Real-time Data)]
+end
 
-    subgraph "Storage"
-        DBeaver(PostgreSQL DB<br/>Docker Container)
-        Bronze[Bronze Layer<br/>Raw Data]
-        Silver[Silver Layer<br/>Cleaned/Staging Data]
-        Gold[Gold Layer<br/>Star Schema]
-        Hadoop[(HDFS/Hive<br/>Data Lake)]
-    end
 
-    Raw -->|Extract| Python
-    Python -->|Load| DBeaver
-    DBeaver -. Bronze .-> Talend
-    Talend -->|Transform & Load| Silver
-    Silver -->|Dimensional Model| Talend
-    Talend -->|Enrichment| WeatherAPI
+%% ============================
+%%      ETL / PROCESSING
+%% ============================
+subgraph Processing["ETL / Processing"]
+    Python[Python ETL Script<br/>Multi-threaded Ingestion]
+    Talend[Talend 8.0.1<br/>Data Transformation/Cleansing]
+    Spark[Apache Spark 3.3.0<br/>Batch Processing]
+    Airflow[Apache Airflow 2.0+<br/>Workflow Orchestrator]
+end
 
-    %% New Flow: Talend feeds Spark
-    Talend -->|Cleaned Data| Spark
-    Spark -->|Load| Hadoop
 
-    Talend -->|Load| Gold
+%% ============================
+%%         STORAGE LAYER
+%% ============================
+subgraph Storage["Storage Layers"]
+    DBeaver[(PostgreSQL DB<br/>Docker Container)]
+    Bronze[Bronze Layer<br/>Raw Data]
+    Silver[Silver Layer<br/>Cleaned/Staging Data]
+    Gold[Gold Layer<br/>Star Schema]
+    Hadoop[(HDFS/Hive<br/>Data Lake)]
+end
 
-    Airflow -. orchestrates .-> Python
-    Airflow -. orchestrates .-> Talend
-    Airflow -. orchestrates .-> Spark
 
-    style DBeaver fill:#4169E1,stroke:#4169E1,color:#fff,stroke-width:2px
-    style Python fill:#3776AB,stroke:#3776AB,color:#fff,stroke-width:2px
-    style Talend fill:#FF5B00,stroke:#FF5B00,color:#fff,stroke-width:2px
-    style Spark fill:#E25A1C,stroke:#E25A1C,color:#fff,stroke-width:2px
-    style Airflow fill:#017CEE,stroke:#017CEE,color:#fff,stroke-width:2px
-    style Hadoop fill:#66CCFF,stroke:#66CCFF,color:#000,stroke-width:2px
+%% ============================
+%%          DATA FLOW
+%% ============================
+
+%% Extraction
+Raw -->|Extract| Python
+
+%% Load to PostgreSQL
+Python -->|Load| DBeaver
+
+%% Bronze to Talend Flow
+DBeaver -. Bronze Layer .-> Bronze
+Bronze --> Talend
+
+%% Talend to Silver
+Talend -->|Transform & Load| Silver
+
+%% Silver Model Processing
+Silver -->|Dimensional Model| Talend
+
+%% Talend Weather Enrichment
+Talend -->|Enrichment| WeatherAPI
+
+%% Talend to Gold
+Talend -->|Load| Gold
+
+%% Talend to Spark
+Talend -->|Cleaned Data| Spark
+
+%% Spark to Hadoop
+Spark -->|Load| Hadoop
+
+
+%% ============================
+%%      AIRFLOW ORCHESTRATION
+%% ============================
+Airflow -. orchestrates .-> Python
+Airflow -. orchestrates .-> Talend
+Airflow -. orchestrates .-> Spark
+
+
+%% ============================
+%%          STYLING
+%% ============================
+style DBeaver fill:#4169E1,stroke:#4169E1,color:#fff,stroke-width:2px
+style Python fill:#3776AB,stroke:#3776AB,color:#fff,stroke-width:2px
+style Talend fill:#FF5B00,stroke:#FF5B00,color:#fff,stroke-width:2px
+style Spark fill:#E25A1C,stroke:#E25A1C,color:#fff,stroke-width:2px
+style Airflow fill:#017CEE,stroke:#017CEE,color:#fff,stroke-width:2px
+style Hadoop fill:#66CCFF,stroke:#66CCFF,color:#000,stroke-width:2px
+style Bronze fill:#8D6E63,stroke:#5D4037,color:#fff,stroke-width:2px
+style Silver fill:#B0BEC5,stroke:#546E7A,color:#000,stroke-width:2px
+style Gold fill:#FDD835,stroke:#F9A825,color:#000,stroke-width:2px
+
 ```
 
 ### Technology Stack
@@ -156,12 +200,12 @@ docker compose ps
 
 ### Access Web UIs
 
-| Service              | URL                   | Credentials   |
-| -------------------- | --------------------- | ------------- |
-| **Airflow**          | http://localhost:8082 | admin / admin |
-| **Spark Master**     | http://localhost:8080 | -             |
-| **HDFS NameNode**    | http://localhost:9870 | -             |
-| **Jupyter Notebook** | http://localhost:8888 | -             |
+| Service              | URL                   | Credentials     |
+| -------------------- | --------------------- | --------------- |
+| **Airflow**          | http://localhost:8082 | airfow / airfow |
+| **Spark Master**     | http://localhost:8080 | -               |
+| **HDFS NameNode**    | http://localhost:9870 | -               |
+| **Jupyter Notebook** | http://localhost:8888 | -               |
 
 ## 📁 File Structure
 
@@ -258,33 +302,54 @@ The main DAG orchestrates the complete ETL pipeline with 12 tasks:
 
 ```mermaid
 flowchart TB
-    subgraph Setup_Ingestion_Bronze
-        A[wait_for_postgres\nDB Health Check] --> B[python_load_flights\nIngest DIM_FLIGHT (6M+)]
-        A --> C[python_load_bookings\nIngest FACT_BOOKING (500K+)]
+
+    %% Outer box: Airflow orchestrates everything
+    subgraph AIRFLOW
+
+        %% Bronze layer
+        subgraph Bronze
+            KAG[Kaggle_file] --> PY[python_etl_load_to_bronze]
+            PY --> BRZ_PROC[bronze_procedure]
+        end
+
+        %% Silver layer
+        subgraph Silver
+            BRZ_PROC --> TAL_SIL[talend_process_to_silver]
+            TAL_SIL --> SIL_TABLES[silver_layer_tables]
+            SIL_PROC[silver_procedure] --> SIL_TABLES
+        end
+
+        %% Gold layer
+        subgraph Gold
+            BRZ_PROC --> TAL_GOLD[talend_process_to_gold]
+            TAL_GOLD --> GOLD_TABLES[gold_layer_tables]
+            GOLD_PROC[gold_procedure] --> GOLD_TABLES
+        end
+
+        %% Spark + Hadoop
+        subgraph Batch
+            GOLD_TABLES --> SPARK[spark_batch_to_hadoop]
+            SPARK --> HADOOP[hadoop_batch_processing]
+        end
+
     end
 
-    subgraph Transformation_Silver_Gold
-        B --> D[talend_clean_silver\nCleanse & Stage Data]
-        C --> D
-        D --> E[talend_dim_build\nBuild Dimensions]
-        E --> F[talend_fact_load\nLoad FACT_BOOKING]
-        F --> G[weather_api_enrich\nEnrich DIM_WEATHER]
-    end
+    %% Styles
+    style AIRFLOW fill:#ECEFF1,stroke:#37474F,stroke-width:3px,color:#000
+    style KAG fill:#FFF9C4,stroke:#F57F17
+    style PY  fill:#BBDEFB,stroke:#1976D2
+    style BRZ_PROC fill:#B3E5FC,stroke:#0288D1
 
-    subgraph Validation_Finish
-        G --> H[validate_gold_schema\nCheck Star Schema]
-        H --> I[pipeline_complete\nDone]
-    end
+    style TAL_SIL fill:#FFE0B2,stroke:#F57C00
+    style SIL_TABLES fill:#FFF3E0,stroke:#FF8F00
+    style SIL_PROC fill:#FFE0B2,stroke:#F57C00
 
-    style A fill:#4FC3F7,stroke:#0288D1,color:#000,stroke-width:2px
-    style B fill:#3776AB,stroke:#1D4B7D,color:#fff,stroke-width:3px
-    style C fill:#3776AB,stroke:#1D4B7D,color:#fff,stroke-width:3px
-    style D fill:#FF7043,stroke:#D84315,color:#fff,stroke-width:3px
-    style E fill:#FFD54F,stroke:#F57C00,color:#000,stroke-width:2px
-    style F fill:#FFD54F,stroke:#F57C00,color:#000,stroke-width:2px
-    style G fill:#BA68C8,stroke:#7B1FA2,color:#fff,stroke-width:2px
-    style H fill:#81C784,stroke:#388E3C,color:#000,stroke-width:2px
-    style I fill:#66BB6A,stroke:#2E7D32,color:#fff,stroke-width:3px
+    style TAL_GOLD fill:#E1BEE7,stroke:#8E24AA
+    style GOLD_TABLES fill:#FFFDE7,stroke:#FBC02D
+    style GOLD_PROC fill:#E1BEE7,stroke:#7B1FA2
+
+    style SPARK fill:#C8E6C9,stroke:#388E3C
+    style HADOOP fill:#CFD8DC,stroke:#455A64
 ```
 
 **Pipeline Duration**: ~4-6 minutes  
