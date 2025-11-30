@@ -88,10 +88,13 @@ with DAG(
     spark_batch_processor = BashOperator(
     task_id = 'spark_batch_processor',
     bash_command="""
-docker exec spark-master /spark/bin/spark-submit --master spark://spark-master:7077 --packages org.postgresql:postgresql:42.7.7 --conf spark.pyspark.python=/usr/bin/python3 /tmp/spark_drivers/batch.py
+docker exec spark-master /spark/bin/spark-submit \
+  --master spark://spark-master:7077 \
+  --jars /opt/spark/jars/postgresql-42.7.7.jar \
+  --conf spark.pyspark.python=/usr/bin/python3 \
+  /tmp/spark_drivers/batch.py
 """
 )
-    
     call_bronze_procedure = PythonOperator(
         task_id="call_bronze_procedure",
         python_callable=call_procedure,
