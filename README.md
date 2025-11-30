@@ -51,8 +51,8 @@ graph TB
     Silver -->|Dimensional Model| Talend
     Talend -->|Enrichment| WeatherAPI
     Talend -->|Load| Gold
-    Airflow -.orchestrates.-> Python
-    Airflow -.orchestrates.-> Talend
+    Airflow -. orchestrates .-> Python
+    Airflow -. orchestrates .-> Talend
 
     style DBeaver fill:#4169E1,stroke:#4169E1,color:#fff,stroke-width:2px
     style Python fill:#3776AB,stroke:#3776AB,color:#fff,stroke-width:2px
