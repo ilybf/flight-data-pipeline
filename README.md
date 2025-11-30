@@ -248,33 +248,33 @@ The main DAG orchestrates the complete ETL pipeline with 12 tasks:
 
 ```mermaid
 graph LR
-    subgraph "Setup & Ingestion (Bronze)"
-        A[wait_for_postgres<br/>DB Health Check] --> B[python_load_flights<br/>Ingest DIM_FLIGHT (6M+)]
-        A --> C[python_load_bookings<br/>Ingest FACT_BOOKING (500K+)]
-    end
-    
-    subgraph "Transformation (Silver & Gold)"
-        B --> D[talend_clean_silver<br/>Cleanse & Stage Data]
-        C --> D
-        D --> E[talend_dim_build<br/>Build Dimensions]
-        E --> F[talend_fact_load<br/>Load FACT_BOOKING]
-        F --> G[weather_api_enrich<br/>Enrich DIM_WEATHER]
-    end
-    
-    subgraph "Validation & Finish"
-        G --> H[validate_gold_schema<br/>Check Star Schema]
-        H --> I[pipeline_complete<br/>✅ Done]
-    end
+    subgraph "Setup & Ingestion (Bronze)"
+        A[wait_for_postgres\nDB Health Check] --> B[python_load_flights\nIngest DIM_FLIGHT (6M+)]
+        A --> C[python_load_bookings\nIngest FACT_BOOKING (500K+)]
+    end
 
-    style A fill:#4FC3F7,stroke:#0288D1,color:#000,stroke-width:2px
-    style B fill:#3776AB,stroke:#1D4B7D,color:#fff,stroke-width:3px
-    style C fill:#3776AB,stroke:#1D4B7D,color:#fff,stroke-width:3px
-    style D fill:#FF7043,stroke:#D84315,color:#fff,stroke-width:3px
-    style E fill:#FFD54F,stroke:#F57C00,color:#000,stroke-width:2px
-    style F fill:#FFD54F,stroke:#F57C00,color:#000,stroke-width:2px
-    style G fill:#BA68C8,stroke:#7B1FA2,color:#fff,stroke-width:2px
-    style H fill:#81C784,stroke:#388E3C,color:#000,stroke-width:2px
-    style I fill:#66BB6A,stroke:#2E7D32,color:#fff,stroke-width:3px
+    subgraph "Transformation (Silver & Gold)"
+        B --> D[talend_clean_silver\nCleanse & Stage Data]
+        C --> D
+        D --> E[talend_dim_build\nBuild Dimensions]
+        E --> F[talend_fact_load\nLoad FACT_BOOKING]
+        F --> G[weather_api_enrich\nEnrich DIM_WEATHER]
+    end
+
+    subgraph "Validation & Finish"
+        G --> H[validate_gold_schema\nCheck Star Schema]
+        H --> I[pipeline_complete\nDone]
+    end
+
+    style A fill:#4FC3F7,stroke:#0288D1,color:#000,stroke-width:2px
+    style B fill:#3776AB,stroke:#1D4B7D,color:#fff,stroke-width:3px
+    style C fill:#3776AB,stroke:#1D4B7D,color:#fff,stroke-width:3px
+    style D fill:#FF7043,stroke:#D84315,color:#fff,stroke-width:3px
+    style E fill:#FFD54F,stroke:#F57C00,color:#000,stroke-width:2px
+    style F fill:#FFD54F,stroke:#F57C00,color:#000,stroke-width:2px
+    style G fill:#BA68C8,stroke:#7B1FA2,color:#fff,stroke-width:2px
+    style H fill:#81C784,stroke:#388E3C,color:#000,stroke-width:2px
+    style I fill:#66BB6A,stroke:#2E7D32,color:#fff,stroke-width:3px
 ```
 
 **Pipeline Duration**: ~4-6 minutes  
