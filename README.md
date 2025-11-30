@@ -249,7 +249,6 @@ The main DAG orchestrates the complete ETL pipeline with 12 tasks:
 ```mermaid
 graph LR
     subgraph "Setup & Ingestion (Bronze)"
-        A[wait_for_postgres\nDB Health Check] --> B[python_load_flights\nIngest DIM_FLIGHT (6M+)]
         A --> C[python_load_bookings\nIngest FACT_BOOKING (500K+)]
     end
 
