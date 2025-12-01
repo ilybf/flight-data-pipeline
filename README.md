@@ -188,16 +188,6 @@ The pipeline ingests data from two primary sources: a large historical file for 
 - Docker Engine 20.10+ (for PostgreSQL DB)
 - DBeaver (or any PostgreSQL client)
 
-### Quick Start
-
-```bash
-docker compose up --build -d
-
-# Wait for services to be healthy (2-3 minutes)
-docker compose ps
-
-```
-
 ### Access Web UIs
 
 | Service              | URL                   | Credentials     |
@@ -396,6 +386,44 @@ flowchart TB
 **🐳 Containerized Database: The entire data warehouse is hosted on a Dockerized PostgreSQL instance for a stable and easily reproducible environment.**
 
 **🔌 Direct Connectivity: JDBC/ODBC connectivity between Talend and the PostgreSQL data warehouse for efficient data manipulation.**
+
+### Quick Start
+
+### Batch Proccessing
+
+```bash
+docker compose up --build -d
+
+# Wait for services to be healthy (2-3 minutes)
+docker compose ps
+```
+
+### Stream Proccessing
+
+```bash
+#for spark consumer
+docker cp scripts/pyspark/receiver.py spark-master:/opt/kafka_consumer.py
+
+docker exec -it spark-master /spark/bin/spark-submit \
+    --master spark://spark-master:7077 \
+    --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0 \
+    --jars /opt/spark/jars/postgresql-42.7.7.jar \
+   /opt/kafka_consumer.py
+
+
+#for kafka producer
+docker cp notebooks/producer.py spark-notebook:/tmp/kafka_streaming_job.py
+
+docker exec -it spark-notebook pip install kafka-python
+
+
+docker exec -it --user root spark-notebook /usr/local/spark/bin/spark-submit \
+      --master spark://spark-master:7077 \
+      --name NotebookStreamingConsumer \
+      --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0 \
+   /tmp/kafka_streaming_job.py
+
+```
 
 ---
 
