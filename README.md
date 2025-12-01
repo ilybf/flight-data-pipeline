@@ -401,7 +401,7 @@ docker compose ps
 ### Stream Proccessing
 
 ```bash
-#for spark consumer
+#For spark consumer
 docker cp scripts/pyspark/receiver.py spark-master:/opt/kafka_consumer.py
 
 docker exec -it spark-master /spark/bin/spark-submit \
@@ -411,7 +411,7 @@ docker exec -it spark-master /spark/bin/spark-submit \
    /opt/kafka_consumer.py
 
 
-#for kafka producer
+#For kafka producer
 docker cp notebooks/producer.py spark-notebook:/tmp/kafka_streaming_job.py
 
 docker exec -it spark-notebook pip install kafka-python
