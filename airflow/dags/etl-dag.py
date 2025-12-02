@@ -46,55 +46,48 @@ with DAG(
 ) as dag:
     
     copy_spark_script = BashOperator(
-    task_id='copy_spark_script',
-    bash_command="""
-        SPARK_MASTER="spark-master"
-        # 1. CORRECT SOURCE PATH on the worker container
-        SOURCE_PATH="/opt/airflow/scripts/pyspark/batch.py" 
-        DEST_DIR="/tmp/spark_drivers/"
-        SCRIPT_NAME="batch.py"
-        
-        # 2. CREATE DESTINATION DIRECTORY
-        docker exec ${SPARK_MASTER} mkdir -p ${DEST_DIR}
+        task_id='copy_spark_script',
+        bash_command="""
+            # 1. Create directory on Spark Master
+            docker exec spark-master mkdir -p /tmp/spark_drivers/ && \
+            
+            # 2. Cleanup old file if it exists
+            docker exec spark-master rm -rf /tmp/spark_drivers/batch.py && \
+            
+            # 3. Copy the script
+            docker cp /opt/airflow/scripts/pyspark/batch.py spark-master:/tmp/spark_drivers/batch.py
+        """
+    )
 
-        # 3. CRITICAL: RECURSIVELY CLEAN UP CORRUPTED PATH
-        docker exec ${SPARK_MASTER} rm -rf ${DEST_DIR}${SCRIPT_NAME}
-
-        # 4. Copy the file
-        docker cp ${SOURCE_PATH} ${SPARK_MASTER}:${DEST_DIR}${SCRIPT_NAME}
-    """
-)
-    
     copy_jdbc_jar = BashOperator(
-    task_id='copy_jdbc_jar',
-    bash_command="""
-        SPARK_MASTER="spark-master"
-        JAR_PATH="/opt/airflow/drivers/postgresql-42.7.7.jar" 
-        DEST_DIR="/tmp/spark_drivers/"
-        JAR_NAME="postgresql-42.7.7.jar" 
-        
-        # 1. CREATE DESTINATION DIRECTORY (Ensure parent exists)
-        docker exec ${SPARK_MASTER} mkdir -p ${DEST_DIR}
+        task_id='copy_jdbc_jar',
+        bash_command="""
+            # 1. Create directory on Spark Master (Internal Spark Jars folder)
+            docker exec spark-master mkdir -p /spark/jars/ && \
 
-        # 2. **CRITICAL FIX: RECURSIVELY CLEAN UP CORRUPTED PATH**
-        # Use 'rm -rf' to forcibly remove the file/directory, whatever it is.
-        docker exec ${SPARK_MASTER} rm -rf ${DEST_DIR}${JAR_NAME} 
+            # 2. Remove old JAR to ensure no conflicts
+            docker exec spark-master rm -f /spark/jars/postgresql-42.7.7.jar && \
 
-        # 3. Copy the file (will now overwrite cleanly)
-        docker cp ${JAR_PATH} ${SPARK_MASTER}:${DEST_DIR}${JAR_NAME}
-    """
-)
+            # 3. Copy the JAR file
+            # Source path is based on your tree: drivers/folder/file.jar
+            docker cp /opt/airflow/drivers/postgresql-42.7.7.jar/postgresql-42.7.7.jar spark-master:/spark/jars/postgresql-42.7.7.jar && \
+            
+            # 4. Fix permissions so the 'spark' user can read the file
+            docker exec --user root spark-master chmod 644 /spark/jars/postgresql-42.7.7.jar
+        """
+    )
 
     spark_batch_processor = BashOperator(
-    task_id = 'spark_batch_processor',
-    bash_command="""
-docker exec spark-master /spark/bin/spark-submit \
-  --master spark://spark-master:7077 \
-  --jars /opt/spark/jars/postgresql-42.7.7.jar \
-  --conf spark.pyspark.python=/usr/bin/python3 \
-  /tmp/spark_drivers/batch.py
-"""
-)
+        task_id='spark_batch_processor',
+        bash_command="""
+        docker exec spark-master /spark/bin/spark-submit \
+        --master spark://spark-master:7077 \
+        --jars /spark/jars/postgresql-42.7.7.jar \
+        --driver-class-path /spark/jars/postgresql-42.7.7.jar \
+        --conf spark.pyspark.python=/usr/bin/python3 \
+        /tmp/spark_drivers/batch.py
+        """
+    )
     call_bronze_procedure = PythonOperator(
         task_id="call_bronze_procedure",
         python_callable=call_procedure,

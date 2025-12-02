@@ -18,8 +18,6 @@ spark = SparkSession.builder \
     .config("spark.hadoop.hive.metastore.uris", "thrift://hive-metastore:9083") \
     .config("spark.sql.warehouse.dir", "/hive/warehouse")\
     .config("spark.hadoop.fs.defaultFS", "hdfs://namenode:9000")\
-    .config("spark.driver.extraClassPath", "/opt/spark/jars/postgresql-42.7.7.jar") \
-    .config("spark.executor.extraClassPath", "/opt/spark/jars/postgresql-42.7.7.jar") \
     .enableHiveSupport()\
     .getOrCreate()
 
