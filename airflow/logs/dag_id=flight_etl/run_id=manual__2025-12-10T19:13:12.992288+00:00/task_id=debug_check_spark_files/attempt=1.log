@@ -1,0 +1,19 @@
+[2025-12-10T19:15:44.412+0000] {taskinstance.py:1159} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: flight_etl.debug_check_spark_files manual__2025-12-10T19:13:12.992288+00:00 [queued]>
+[2025-12-10T19:15:44.420+0000] {taskinstance.py:1159} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: flight_etl.debug_check_spark_files manual__2025-12-10T19:13:12.992288+00:00 [queued]>
+[2025-12-10T19:15:44.420+0000] {taskinstance.py:1361} INFO - Starting attempt 1 of 1
+[2025-12-10T19:15:44.431+0000] {taskinstance.py:1382} INFO - Executing <Task(BashOperator): debug_check_spark_files> on 2025-12-10 19:13:12.992288+00:00
+[2025-12-10T19:15:44.438+0000] {standard_task_runner.py:57} INFO - Started process 983 to run task
+[2025-12-10T19:15:44.441+0000] {standard_task_runner.py:84} INFO - Running: ['***', 'tasks', 'run', 'flight_etl', 'debug_check_spark_files', 'manual__2025-12-10T19:13:12.992288+00:00', '--job-id', '185', '--raw', '--subdir', 'DAGS_FOLDER/etl-dag.py', '--cfg-path', '/tmp/tmpj4s49v6r']
+[2025-12-10T19:15:44.443+0000] {standard_task_runner.py:85} INFO - Job 185: Subtask debug_check_spark_files
+[2025-12-10T19:15:44.490+0000] {task_command.py:416} INFO - Running <TaskInstance: flight_etl.debug_check_spark_files manual__2025-12-10T19:13:12.992288+00:00 [running]> on host e0b1e7b27d75
+[2025-12-10T19:15:44.563+0000] {taskinstance.py:1662} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='flight_etl' AIRFLOW_CTX_TASK_ID='debug_check_spark_files' AIRFLOW_CTX_EXECUTION_DATE='2025-12-10T19:13:12.992288+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-12-10T19:13:12.992288+00:00'
+[2025-12-10T19:15:44.565+0000] {subprocess.py:63} INFO - Tmp dir root location: /tmp
+[2025-12-10T19:15:44.565+0000] {subprocess.py:75} INFO - Running command: ['/bin/bash', '-c', '\n            \n            # Use docker exec to run ls inside the Spark Master container\n            docker exec spark-master ls -l /tmp/spark_drivers/\n            \n            echo "--- Debug check complete ---"\n        ']
+[2025-12-10T19:15:44.577+0000] {subprocess.py:86} INFO - Output:
+[2025-12-10T19:15:44.640+0000] {subprocess.py:93} INFO - total 4
+[2025-12-10T19:15:44.640+0000] {subprocess.py:93} INFO - -rw-r--r-- 1 1000 1000 3046 Dec  2 16:28 batch.py
+[2025-12-10T19:15:44.642+0000] {subprocess.py:93} INFO - --- Debug check complete ---
+[2025-12-10T19:15:44.642+0000] {subprocess.py:97} INFO - Command exited with return code 0
+[2025-12-10T19:15:44.667+0000] {taskinstance.py:1400} INFO - Marking task as SUCCESS. dag_id=flight_etl, task_id=debug_check_spark_files, execution_date=20251210T191312, start_date=20251210T191544, end_date=20251210T191544
+[2025-12-10T19:15:44.692+0000] {local_task_job_runner.py:228} INFO - Task exited with return code 0
+[2025-12-10T19:15:44.728+0000] {taskinstance.py:2778} INFO - 1 downstream tasks scheduled from follow-on schedule check

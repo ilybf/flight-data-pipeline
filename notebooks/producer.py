@@ -62,7 +62,7 @@ while True:
 
 # docker cp notebooks/producer.py spark-notebook:/tmp/kafka_streaming_job.py              
 
-#docker exec -it spark-notebook pip install kafka-python
+# docker exec -it spark-notebook pip install kafka-python
 
 
 #    docker exec -it --user root spark-notebook /usr/local/spark/bin/spark-submit \

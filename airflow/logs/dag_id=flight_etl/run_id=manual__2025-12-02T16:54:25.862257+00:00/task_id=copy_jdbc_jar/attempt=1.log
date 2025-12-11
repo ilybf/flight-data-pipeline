@@ -1,0 +1,16 @@
+[2025-12-02T16:56:14.719+0000] {taskinstance.py:1159} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: flight_etl.copy_jdbc_jar manual__2025-12-02T16:54:25.862257+00:00 [queued]>
+[2025-12-02T16:56:14.725+0000] {taskinstance.py:1159} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: flight_etl.copy_jdbc_jar manual__2025-12-02T16:54:25.862257+00:00 [queued]>
+[2025-12-02T16:56:14.725+0000] {taskinstance.py:1361} INFO - Starting attempt 1 of 1
+[2025-12-02T16:56:14.745+0000] {taskinstance.py:1382} INFO - Executing <Task(BashOperator): copy_jdbc_jar> on 2025-12-02 16:54:25.862257+00:00
+[2025-12-02T16:56:14.750+0000] {standard_task_runner.py:57} INFO - Started process 527 to run task
+[2025-12-02T16:56:14.752+0000] {standard_task_runner.py:84} INFO - Running: ['***', 'tasks', 'run', 'flight_etl', 'copy_jdbc_jar', 'manual__2025-12-02T16:54:25.862257+00:00', '--job-id', '134', '--raw', '--subdir', 'DAGS_FOLDER/etl-dag.py', '--cfg-path', '/tmp/tmp_jy6pr93']
+[2025-12-02T16:56:14.754+0000] {standard_task_runner.py:85} INFO - Job 134: Subtask copy_jdbc_jar
+[2025-12-02T16:56:14.797+0000] {task_command.py:416} INFO - Running <TaskInstance: flight_etl.copy_jdbc_jar manual__2025-12-02T16:54:25.862257+00:00 [running]> on host aee8163c4710
+[2025-12-02T16:56:14.880+0000] {taskinstance.py:1662} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='flight_etl' AIRFLOW_CTX_TASK_ID='copy_jdbc_jar' AIRFLOW_CTX_EXECUTION_DATE='2025-12-02T16:54:25.862257+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-12-02T16:54:25.862257+00:00'
+[2025-12-02T16:56:14.882+0000] {subprocess.py:63} INFO - Tmp dir root location: /tmp
+[2025-12-02T16:56:14.882+0000] {subprocess.py:75} INFO - Running command: ['/bin/bash', '-c', "\n            # 1. Create directory on Spark Master (Internal Spark Jars folder)\n            docker exec spark-master mkdir -p /spark/jars/ && \n            # 2. Remove old JAR to ensure no conflicts\n            docker exec spark-master rm -f /spark/jars/postgresql-42.7.7.jar && \n            # 3. Copy the JAR file\n            # Source path is based on your tree: drivers/folder/file.jar\n            docker cp /opt/***/drivers/postgresql-42.7.7.jar/postgresql-42.7.7.jar spark-master:/spark/jars/postgresql-42.7.7.jar &&             \n            # 4. Fix permissions so the 'spark' user can read the file\n            docker exec --user root spark-master chmod 644 /spark/jars/postgresql-42.7.7.jar\n        "]
+[2025-12-02T16:56:14.896+0000] {subprocess.py:86} INFO - Output:
+[2025-12-02T16:56:15.122+0000] {subprocess.py:97} INFO - Command exited with return code 0
+[2025-12-02T16:56:15.171+0000] {taskinstance.py:1400} INFO - Marking task as SUCCESS. dag_id=flight_etl, task_id=copy_jdbc_jar, execution_date=20251202T165425, start_date=20251202T165614, end_date=20251202T165615
+[2025-12-02T16:56:15.245+0000] {local_task_job_runner.py:228} INFO - Task exited with return code 0
+[2025-12-02T16:56:15.275+0000] {taskinstance.py:2778} INFO - 1 downstream tasks scheduled from follow-on schedule check

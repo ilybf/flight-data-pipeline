@@ -108,18 +108,11 @@ with DAG(
     debug_check_spark_files = BashOperator(
         task_id='debug_check_spark_files',
         bash_command="""
-            SPARK_MASTER="spark-master"
-            DEST_DIR="/tmp/spark_drivers/"
-            
-            echo "--- Checking files on ${SPARK_MASTER}:${DEST_DIR} ---"
             
             # Use docker exec to run ls inside the Spark Master container
-            docker exec ${SPARK_MASTER} ls -l ${DEST_DIR}
+            docker exec spark-master ls -l /tmp/spark_drivers/
             
             echo "--- Debug check complete ---"
-            
-            # If the ls command fails or files are missing, this task will still succeed 
-            # unless we force a failure, but the logs will tell us everything we need.
         """
     )
 
