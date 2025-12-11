@@ -1,0 +1,21 @@
+[2025-12-11T01:35:15.250+0000] {taskinstance.py:1159} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: flight_etl.run_machine_learning_load manual__2025-12-11T01:33:14.006032+00:00 [queued]>
+[2025-12-11T01:35:15.258+0000] {taskinstance.py:1159} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: flight_etl.run_machine_learning_load manual__2025-12-11T01:33:14.006032+00:00 [queued]>
+[2025-12-11T01:35:15.259+0000] {taskinstance.py:1361} INFO - Starting attempt 1 of 1
+[2025-12-11T01:35:15.267+0000] {taskinstance.py:1382} INFO - Executing <Task(BashOperator): run_machine_learning_load> on 2025-12-11 01:33:14.006032+00:00
+[2025-12-11T01:35:15.271+0000] {standard_task_runner.py:57} INFO - Started process 1665 to run task
+[2025-12-11T01:35:15.274+0000] {standard_task_runner.py:84} INFO - Running: ['***', 'tasks', 'run', 'flight_etl', 'run_machine_learning_load', 'manual__2025-12-11T01:33:14.006032+00:00', '--job-id', '232', '--raw', '--subdir', 'DAGS_FOLDER/etl-dag.py', '--cfg-path', '/tmp/tmpvuv5a292']
+[2025-12-11T01:35:15.277+0000] {standard_task_runner.py:85} INFO - Job 232: Subtask run_machine_learning_load
+[2025-12-11T01:35:15.329+0000] {task_command.py:416} INFO - Running <TaskInstance: flight_etl.run_machine_learning_load manual__2025-12-11T01:33:14.006032+00:00 [running]> on host 8115e33213ed
+[2025-12-11T01:35:15.403+0000] {taskinstance.py:1662} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='flight_etl' AIRFLOW_CTX_TASK_ID='run_machine_learning_load' AIRFLOW_CTX_EXECUTION_DATE='2025-12-11T01:33:14.006032+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-12-11T01:33:14.006032+00:00'
+[2025-12-11T01:35:15.406+0000] {subprocess.py:63} INFO - Tmp dir root location: /tmp
+[2025-12-11T01:35:15.406+0000] {subprocess.py:75} INFO - Running command: ['/bin/bash', '-c', '\n        cd /opt/***/etl_scripts &&         python machine_learning.py\n    ']
+[2025-12-11T01:35:15.426+0000] {subprocess.py:86} INFO - Output:
+[2025-12-11T01:35:17.291+0000] {subprocess.py:93} INFO - Training Classifier...
+[2025-12-11T01:35:17.292+0000] {subprocess.py:93} INFO - Training Regressor...
+[2025-12-11T01:35:17.292+0000] {subprocess.py:93} INFO - Classifier Accuracy: 1.0
+[2025-12-11T01:35:17.292+0000] {subprocess.py:93} INFO - Regressor MAE: 1.2829136904761906
+[2025-12-11T01:35:17.292+0000] {subprocess.py:93} INFO - Model Trained & Saved Successfully as: v20251211_0135
+[2025-12-11T01:35:17.450+0000] {subprocess.py:97} INFO - Command exited with return code 0
+[2025-12-11T01:35:17.477+0000] {taskinstance.py:1400} INFO - Marking task as SUCCESS. dag_id=flight_etl, task_id=run_machine_learning_load, execution_date=20251211T013314, start_date=20251211T013515, end_date=20251211T013517
+[2025-12-11T01:35:17.532+0000] {local_task_job_runner.py:228} INFO - Task exited with return code 0
+[2025-12-11T01:35:17.566+0000] {taskinstance.py:2778} INFO - 1 downstream tasks scheduled from follow-on schedule check

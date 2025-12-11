@@ -14,7 +14,7 @@ def call_procedure(procedure_name):
 
     try: 
         print(f"Starting {procedure_name} procedure execution...")
-        cursor.execute(f"CALL {procedure_name}_layer();")
+        cursor.execute(f"CALL {procedure_name};")
 
         conn.commit()
         print(f"Procedure {procedure_name} execution is done...")
@@ -91,19 +91,25 @@ with DAG(
     call_bronze_procedure = PythonOperator(
         task_id="call_bronze_procedure",
         python_callable=call_procedure,
-        op_args=['bronze']
+        op_args=['bronze_layer()']
     )
 
     call_silver_procedure = PythonOperator(
         task_id="call_silver_procedure",
         python_callable=call_procedure,
-        op_args=['silver']
+        op_args=['silver_layer()']
     )
 
     call_gold_procedure = PythonOperator(
         task_id="call_gold_procedure",
         python_callable=call_procedure,
-        op_args=['gold']
+        op_args=['gold_layer()']
+    )
+
+    call_ml_procedure = PythonOperator(
+        task_id="call_ml_procedure",
+        python_callable=call_procedure,
+        op_args=['machine_learning()']
     )
     debug_check_spark_files = BashOperator(
         task_id='debug_check_spark_files',
@@ -134,11 +140,28 @@ with DAG(
         python main.py
     """
 )
+    
 
 
     run_talend_etl = PythonOperator(
         task_id="talend_etl_pipeline",
         python_callable=run_talend_job,
+    )
+
+    run_machine_learning_load = BashOperator(
+        task_id="run_machine_learning_load",
+        bash_command="""
+        cd /opt/airflow/etl_scripts && \
+        python machine_learning.py
+    """
+    )
+
+    run_machine_learning_prediction = BashOperator(
+        task_id="run_machine_learning_prediction",
+        bash_command="""
+        cd /opt/airflow/etl_scripts && \
+        python ml_job.py
+    """
     )
     call_bronze_procedure >> call_silver_procedure >> call_gold_procedure
 
@@ -148,6 +171,8 @@ with DAG(
 
     (
     run_talend_etl
+    >> run_machine_learning_load
+    >> run_machine_learning_prediction
     >> copy_spark_script
     >> copy_jdbc_jar
     >> debug_check_spark_files
